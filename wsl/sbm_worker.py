@@ -52,10 +52,11 @@ def main():
     g.add_edge_list(edges)
 
     # Run SBM
+    # graph-tool 2.59+: deg_corr is passed via state_args
+    sa = {"deg_corr": args.deg_corr}
+
     if args.model == "nested":
-        state = gt.minimize_nested_blockmodel_dl(
-            g, deg_corr=args.deg_corr, state_args=dict(recs=[], rec_types=[])
-        )
+        state = gt.minimize_nested_blockmodel_dl(g, state_args=sa)
         # Extract levels
         levels = []
         for level in state.levels:
@@ -63,7 +64,7 @@ def main():
         membership = levels[0] if levels else []
         dl = state.entropy()
     else:
-        state = gt.minimize_blockmodel_dl(g, deg_corr=args.deg_corr)
+        state = gt.minimize_blockmodel_dl(g, state_args=sa)
         membership = [int(x) for x in state.get_blocks().a]
         levels = [membership]
         dl = state.entropy()
