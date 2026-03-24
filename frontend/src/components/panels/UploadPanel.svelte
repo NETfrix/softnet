@@ -11,7 +11,10 @@
   let uploading = false;
 
   async function handleUpload() {
-    if (!fileInput?.files?.length) return;
+    if (!fileInput?.files?.length) {
+      $statusMessage = "Please select a file first";
+      return;
+    }
 
     uploading = true;
     $statusMessage = "Uploading...";
