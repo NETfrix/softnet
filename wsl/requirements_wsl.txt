@@ -1,0 +1,3 @@
+# graph-tool must be installed via apt (see setup_graphtool.sh)
+# These are additional pip dependencies for the WSL worker
+numpy
