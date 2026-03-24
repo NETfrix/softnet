@@ -2,15 +2,13 @@
 name = "softnet"
 version = "0.1.0"
 description = "Social Network Analysis Tool"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.110.0",
     "uvicorn[standard]>=0.27.0",
     "python-multipart>=0.0.9",
     "python-igraph>=0.11.3",
     "leidenalg>=0.10.2",
-    "infomap>=2.7.0",
-    "fa2>=0.3.5",
     "msgpack>=1.0.7",
     "numpy>=1.26.0",
     "lxml>=5.1.0",
@@ -21,7 +19,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+infomap = ["infomap>=2.7.0"]
+fa2 = ["fa2>=0.3.5"]
 ergm = ["rpy2>=3.5.15"]
+all = ["infomap>=2.7.0", "fa2>=0.3.5", "rpy2>=3.5.15"]
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
@@ -30,6 +31,9 @@ dev = [
 
 [project.scripts]
 softnet = "backend.main:main"
+
+[tool.setuptools.packages.find]
+include = ["backend*"]
 
 [build-system]
 requires = ["setuptools>=68.0"]

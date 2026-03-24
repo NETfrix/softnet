@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 import igraph as ig
-from infomap import Infomap
+
+try:
+    from infomap import Infomap
+    HAS_INFOMAP = True
+except ImportError:
+    HAS_INFOMAP = False
 
 
 def infomap_detect(
@@ -10,6 +15,11 @@ def infomap_detect(
     num_trials: int = 10,
 ) -> dict:
     """Infomap community detection."""
+    if not HAS_INFOMAP:
+        raise ImportError(
+            "Infomap is not installed. Install it with: pip install infomap "
+            "(requires a C compiler)"
+        )
     im = Infomap(silent=True, num_trials=num_trials, directed=directed)
 
     # Add edges
