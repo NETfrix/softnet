@@ -1,7 +1,6 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-dist/
 build/
 .eggs/
 *.egg
@@ -9,7 +8,6 @@ build/
 venv/
 env/
 node_modules/
-frontend/dist/
 .env
 .env.local
 *.log

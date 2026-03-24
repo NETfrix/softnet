@@ -1,5 +1,4 @@
 {
-  "extends": "@sveltejs/vite-plugin-svelte/tsconfig.json",
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,

@@ -17,16 +17,9 @@ if ! command -v python3 &>/dev/null; then
     exit 1
 fi
 
-# Check Node
-if ! command -v node &>/dev/null; then
-    echo "  [ERROR] Node.js not found. Install Node.js 18+"
-    read -p "  Press Enter to exit..."
-    exit 1
-fi
-
 # Create venv if needed
 if [ ! -d ".venv" ]; then
-    echo "  [1/4] Creating virtual environment..."
+    echo "  [1/2] Creating virtual environment..."
     python3 -m venv .venv
 fi
 
@@ -34,17 +27,8 @@ source .venv/bin/activate
 
 # Install Python deps if needed
 if ! python -c "import fastapi" 2>/dev/null; then
-    echo "  [2/4] Installing Python dependencies..."
+    echo "  [2/2] Installing dependencies (first run only)..."
     pip install -e . -q
-fi
-
-# Build frontend if needed
-if [ ! -f "frontend/dist/index.html" ]; then
-    echo "  [3/4] Installing frontend dependencies..."
-    cd frontend && npm install --silent
-    echo "  [4/4] Building frontend..."
-    npm run build --silent
-    cd ..
 fi
 
 echo ""

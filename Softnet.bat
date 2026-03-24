@@ -17,20 +17,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: Check Node.js
-node --version >nul 2>&1
-if errorlevel 1 (
-    echo  [ERROR] Node.js not found. Install Node.js 18+ from nodejs.org
-    echo.
-    pause
-    exit /b 1
-)
-
 cd /d "%~dp0"
 
 :: Create venv if it doesn't exist
 if not exist ".venv" (
-    echo  [1/4] Creating virtual environment...
+    echo  [1/2] Creating virtual environment...
     python -m venv .venv
 )
 
@@ -39,25 +30,10 @@ call .venv\Scripts\activate.bat
 
 :: Install Python deps if needed
 if not exist ".venv\Lib\site-packages\fastapi" (
-    echo  [2/4] Installing Python dependencies...
+    echo  [2/2] Installing dependencies (first run only)...
     pip install -e . >nul 2>&1
     if errorlevel 1 (
-        echo  [ERROR] Failed to install Python dependencies.
-        pause
-        exit /b 1
-    )
-)
-
-:: Install and build frontend if needed
-if not exist "frontend\dist\index.html" (
-    echo  [3/4] Installing frontend dependencies...
-    cd frontend
-    call npm install >nul 2>&1
-    echo  [4/4] Building frontend...
-    call npm run build >nul 2>&1
-    cd ..
-    if not exist "frontend\dist\index.html" (
-        echo  [ERROR] Frontend build failed.
+        echo  [ERROR] Failed to install dependencies.
         pause
         exit /b 1
     )
