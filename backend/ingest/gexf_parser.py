@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import tempfile
 from typing import BinaryIO
 
@@ -12,21 +13,16 @@ def parse_gexf(file: BinaryIO) -> ig.Graph:
         tmp.write(file.read())
         tmp_path = tmp.name
 
-    g = ig.Graph.Read_GraphML(tmp_path)  # igraph reads GEXF via GraphML path
-    # Try native GEXF if available
     try:
-        g = ig.Graph.Read(tmp_path, format="gexf")
-    except Exception:
-        # Fallback: parse with lxml
         g = _parse_gexf_lxml(tmp_path)
+    finally:
+        os.unlink(tmp_path)
 
-    import os
-    os.unlink(tmp_path)
     return g
 
 
 def _parse_gexf_lxml(path: str) -> ig.Graph:
-    """Fallback GEXF parser using lxml."""
+    """Parse GEXF using lxml."""
     from lxml import etree
 
     tree = etree.parse(path)
@@ -39,11 +35,10 @@ def _parse_gexf_lxml(path: str) -> ig.Graph:
     # Parse attribute declarations
     attr_defs: dict[str, dict[str, str]] = {}
     for attrs_el in root.findall(".//g:attributes", ns):
-        attr_class = attrs_el.get("class", "node")
         for attr_el in attrs_el.findall("g:attribute", ns):
             attr_defs[attr_el.get("id")] = {
                 "title": attr_el.get("title"),
-                "class": attr_class,
+                "class": attrs_el.get("class", "node"),
             }
 
     # Parse nodes
