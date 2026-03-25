@@ -19,3 +19,4 @@ node_modules/
 .claude/plans/
 softnet_backend.egg-info/
 .claude/
+softnet/
