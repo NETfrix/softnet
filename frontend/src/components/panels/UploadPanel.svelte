@@ -4,8 +4,6 @@
 
   let name = "Untitled";
   let directed = false;
-  let sourceCol = "source";
-  let targetCol = "target";
   let fileInput: HTMLInputElement;
   let nodeFileInput: HTMLInputElement;
   let uploading = false;
@@ -21,10 +19,8 @@
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
-    formData.append("name", name);
+    formData.append("name", name || fileInput.files[0].name);
     formData.append("directed", String(directed));
-    formData.append("source_col", sourceCol);
-    formData.append("target_col", targetCol);
 
     if (nodeFileInput?.files?.length) {
       formData.append("node_file", nodeFileInput.files[0]);
@@ -57,26 +53,15 @@
 
   <div class="row">
     <label>
-      Edge file (CSV/GEXF/GraphML/Gephi)
-      <input type="file" accept=".csv,.tsv,.gexf,.graphml,.xml,.gephi" bind:this={fileInput} />
+      Graph file
+      <input type="file" accept=".csv,.tsv,.txt,.gexf,.graphml,.xml,.gephi" bind:this={fileInput} />
     </label>
   </div>
 
   <div class="row">
     <label>
-      Node attributes (optional CSV)
-      <input type="file" accept=".csv" bind:this={nodeFileInput} />
-    </label>
-  </div>
-
-  <div class="row">
-    <label>
-      Source col
-      <input bind:value={sourceCol} />
-    </label>
-    <label>
-      Target col
-      <input bind:value={targetCol} />
+      Node attributes (optional)
+      <input type="file" accept=".csv,.tsv,.txt" bind:this={nodeFileInput} />
     </label>
   </div>
 
@@ -90,6 +75,11 @@
   <button class="primary" on:click={handleUpload} disabled={uploading}>
     {uploading ? "Uploading..." : "Upload"}
   </button>
+
+  <div class="hint">
+    CSV: auto-detects edge list, adjacency matrix, or adjacency list.
+    Also supports GEXF, GraphML, and Gephi project files.
+  </div>
 </div>
 
 <style>
@@ -114,5 +104,12 @@
   button {
     width: 100%;
     margin-top: 4px;
+  }
+
+  .hint {
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1.4;
   }
 </style>
