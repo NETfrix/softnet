@@ -10,6 +10,7 @@ from ...core.tasks import task_manager
 from ...ingest.api_connector import fetch_graph_from_api
 from ...ingest.csv_parser import parse_edge_csv, parse_node_csv
 from ...ingest.gexf_parser import parse_gexf
+from ...ingest.gephi_parser import parse_gephi
 from ...ingest.graphml_parser import parse_graphml
 from ...layout.forceatlas2 import compute_forceatlas2
 from ...layout.utils import normalize_positions
@@ -50,10 +51,13 @@ async def upload_graph(
         elif ext in (".graphml", ".xml"):
             graph = parse_graphml(file.file)
             directed = graph.is_directed()
+        elif ext == ".gephi":
+            graph = parse_gephi(file.file)
+            directed = graph.is_directed()
         else:
             raise HTTPException(
                 status_code=400,
-                detail=f"Unsupported file format: {ext}. Use .csv, .gexf, or .graphml",
+                detail=f"Unsupported file format: {ext}. Use .csv, .gexf, .graphml, or .gephi",
             )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

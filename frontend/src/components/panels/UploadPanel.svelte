@@ -57,8 +57,8 @@
 
   <div class="row">
     <label>
-      Edge file (CSV/GEXF/GraphML)
-      <input type="file" accept=".csv,.tsv,.gexf,.graphml,.xml" bind:this={fileInput} />
+      Edge file (CSV/GEXF/GraphML/Gephi)
+      <input type="file" accept=".csv,.tsv,.gexf,.graphml,.xml,.gephi" bind:this={fileInput} />
     </label>
   </div>
 
