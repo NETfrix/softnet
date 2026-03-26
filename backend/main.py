@@ -20,7 +20,7 @@ _DIST_DIR = _FRONTEND_DIR / "dist"
 app = FastAPI(
     title="Softnet",
     description="Social Network Analysis Tool",
-    version="0.1.0",
+    version="0.8.0",
 )
 
 # Middleware

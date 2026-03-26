@@ -11,6 +11,7 @@ from ...analysis.community.leiden import leiden
 from ...analysis.community.infomap import infomap_detect
 from ...bridges.wsl_graphtool import run_sbm
 from ...analysis.community_graph import create_community_graph
+from ...analysis.community.renumber import renumber_by_size
 from ...schemas.community import CommunityRequest, CommunityResponse
 
 router = APIRouter(prefix="/projects/{project_id}/community", tags=["community"])
@@ -28,6 +29,7 @@ async def detect_communities(project_id: str, req: CommunityRequest):
                 model=req.model,
                 deg_corr=req.deg_corr,
             )
+            result["membership"] = renumber_by_size(result["membership"])
             project.communities[result["key"]] = result["membership"]
             return result
 
@@ -62,6 +64,7 @@ async def detect_communities(project_id: str, req: CommunityRequest):
         else:
             raise ValueError(f"Unknown algorithm: {req.algorithm}")
 
+        result["membership"] = renumber_by_size(result["membership"])
         project.communities[result["key"]] = result["membership"]
         return result
 

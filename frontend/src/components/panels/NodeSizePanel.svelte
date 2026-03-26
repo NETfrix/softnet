@@ -1,10 +1,12 @@
 <script lang="ts">
   import { currentProject } from "../../lib/projectStore";
-  import { currentSizeAttr, currentColorAttr, edgeScale, labelsVisible } from "../../lib/graphStore";
+  import { currentSizeAttr, currentColorAttr, edgeScale, labelScale, edgeBrightness, labelsVisible } from "../../lib/graphStore";
 
   let selectedSize: string | null = $currentSizeAttr;
   let selectedColor: string | null = $currentColorAttr;
   let selectedEdgeScale: number = $edgeScale;
+  let selectedLabelScale: number = $labelScale;
+  let selectedEdgeBrightness: number = $edgeBrightness;
   let showLabels: boolean = $labelsVisible;
 
   $: centralities = $currentProject?.centralities || [];
@@ -14,6 +16,8 @@
     $currentSizeAttr = selectedSize;
     $currentColorAttr = selectedColor;
     $edgeScale = selectedEdgeScale;
+    $labelScale = selectedLabelScale;
+    $edgeBrightness = selectedEdgeBrightness;
     $labelsVisible = showLabels;
   }
 </script>
@@ -49,6 +53,21 @@
   </div>
 
   <div class="row">
+    <label class="checkbox-label">
+      <input type="checkbox" bind:checked={showLabels} />
+      Show node labels
+    </label>
+  </div>
+
+  <div class="row">
+    <label>
+      Label size
+      <input type="range" bind:value={selectedLabelScale} min="0.3" max="3" step="0.1" />
+      <span class="range-val">{selectedLabelScale.toFixed(1)}x</span>
+    </label>
+  </div>
+
+  <div class="row">
     <label>
       Edge thickness
       <input type="range" bind:value={selectedEdgeScale} min="0.1" max="5" step="0.1" />
@@ -57,9 +76,10 @@
   </div>
 
   <div class="row">
-    <label class="checkbox-label">
-      <input type="checkbox" bind:checked={showLabels} />
-      Show node labels
+    <label>
+      Edge brightness
+      <input type="range" bind:value={selectedEdgeBrightness} min="0.05" max="1" step="0.05" />
+      <span class="range-val">{Math.round(selectedEdgeBrightness * 100)}%</span>
     </label>
   </div>
 

@@ -5,7 +5,6 @@
   import CommunityPanel from "../panels/CommunityPanel.svelte";
   import HomophilyPanel from "../panels/HomophilyPanel.svelte";
   import MetricsPanel from "../panels/MetricsPanel.svelte";
-  import NodeSizePanel from "../panels/NodeSizePanel.svelte";
   import SankeyPanel from "../panels/SankeyPanel.svelte";
   import EnrichmentPanel from "../panels/EnrichmentPanel.svelte";
   import { currentProject } from "../../lib/projectStore";
@@ -16,9 +15,8 @@
 
   {#if $currentProject}
     <div class="section">
-      <div class="section-label">Visualization</div>
+      <div class="section-label">Layout</div>
       <LayoutPanel />
-      <NodeSizePanel />
     </div>
 
     <div class="section">

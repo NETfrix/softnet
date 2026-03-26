@@ -15,7 +15,7 @@
 </script>
 
 <div class="toolbar">
-  <div class="brand">Softnet</div>
+  <div class="brand">Softnet <span class="version">0.8</span></div>
 
   <div class="project-selector">
     {#if $projects.length > 0}
@@ -54,6 +54,12 @@
 
   .project-selector select {
     min-width: 200px;
+  }
+
+  .version {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
   }
 
   .spacer {

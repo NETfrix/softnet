@@ -5,6 +5,7 @@
   import SigmaCanvas from "../graph/SigmaCanvas.svelte";
   import CommunityGraphView from "../graph/CommunityGraphView.svelte";
   import ComparisonView from "../graph/ComparisonView.svelte";
+  import NodeSizePanel from "../panels/NodeSizePanel.svelte";
   import { currentProject } from "../../lib/projectStore";
   import { viewMode, communityGraphData, comparisonData } from "../../lib/graphStore";
 </script>
@@ -58,6 +59,11 @@
         </div>
       {/if}
     </div>
+    {#if $currentProject}
+      <div class="right-sidebar">
+        <NodeSizePanel />
+      </div>
+    {/if}
   </div>
   <StatusBar />
 </div>
@@ -82,6 +88,14 @@
     background: var(--bg-primary);
     display: flex;
     flex-direction: column;
+  }
+
+  .right-sidebar {
+    width: 220px;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    flex-shrink: 0;
   }
 
   .view-tabs {

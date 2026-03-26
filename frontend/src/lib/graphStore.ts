@@ -18,6 +18,8 @@ export const currentLayout = writable("default");
 export const currentSizeAttr = writable<string | null>(null);
 export const currentColorAttr = writable<string | null>(null);
 export const edgeScale = writable(1.0);
+export const labelScale = writable(1.0);
+export const edgeBrightness = writable(0.3);
 
 // View mode: "graph" | "community-graph" | "comparison"
 export const viewMode = writable<string>("graph");

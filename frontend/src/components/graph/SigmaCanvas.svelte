@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import Sigma from "sigma";
-  import { graphStore, labelsVisible, deserializeGraph, currentLayout, currentSizeAttr, currentColorAttr, edgeScale } from "../../lib/graphStore";
+  import { graphStore, labelsVisible, deserializeGraph, currentLayout, currentSizeAttr, currentColorAttr, edgeScale, labelScale, edgeBrightness } from "../../lib/graphStore";
   import { currentProject, statusMessage } from "../../lib/projectStore";
   import { getGraphData } from "../../lib/api";
   import GraphControls from "./GraphControls.svelte";
@@ -40,12 +40,16 @@
       sigma.kill();
     }
 
+    const fontSize = Math.round(12 * $labelScale);
+    const bright = Math.round($edgeBrightness * 255);
+    const edgeColor = `rgb(${bright}, ${bright}, ${Math.round(bright * 1.1)})`;
+
     sigma = new Sigma($graphStore, container, {
       renderEdgeLabels: false,
       labelRenderedSizeThreshold: 6,
-      labelFont: "12px sans-serif",
+      labelFont: `${fontSize}px sans-serif`,
       labelColor: { color: "#e4e4e7" },
-      defaultEdgeColor: "#2e3039",
+      defaultEdgeColor: edgeColor,
       defaultNodeColor: "#6366f1",
       labelDensity: 0.07,
       labelGridCellSize: 60,
@@ -74,12 +78,40 @@
     sigma.setSetting("renderLabels", $labelsVisible);
   }
 
-  // React to edge scale changes
-  $: if (sigma && $graphStore) {
-    $graphStore.forEachEdge((edge) => {
-      $graphStore!.setEdgeAttribute(edge, "size", 0.5 * $edgeScale);
-    });
-    sigma.refresh();
+  // React to edge scale / label scale / edge brightness changes — reinit sigma
+  let prevEdgeScale = $edgeScale;
+  let prevLabelScale = $labelScale;
+  let prevBrightness = $edgeBrightness;
+
+  $: {
+    if (sigma && $graphStore && (
+      $edgeScale !== prevEdgeScale ||
+      $labelScale !== prevLabelScale ||
+      $edgeBrightness !== prevBrightness
+    )) {
+      prevEdgeScale = $edgeScale;
+      prevLabelScale = $labelScale;
+      prevBrightness = $edgeBrightness;
+
+      // Update edge sizes
+      $graphStore.forEachEdge((edge) => {
+        $graphStore!.setEdgeAttribute(edge, "size", 0.5 * $edgeScale);
+      });
+
+      // Update label font and edge color by reiniting
+      const fontSize = Math.round(12 * $labelScale);
+      const bright = Math.round($edgeBrightness * 255);
+      const edgeColor = `rgb(${bright}, ${bright}, ${Math.round(bright * 1.1)})`;
+      sigma.setSetting("labelFont", `${fontSize}px sans-serif`);
+      sigma.setSetting("defaultEdgeColor", edgeColor);
+
+      // Update existing edge colors
+      $graphStore.forEachEdge((edge) => {
+        $graphStore!.setEdgeAttribute(edge, "color", edgeColor);
+      });
+
+      sigma.refresh();
+    }
   }
 
   // React to project changes
@@ -144,7 +176,6 @@
   <div class="sigma-container" bind:this={container}></div>
   <div class="overlay top-right">
     <GraphControls on:zoomIn={zoomIn} on:zoomOut={zoomOut} on:fit={fitToScreen} />
-    <LabelToggle />
   </div>
   {#if hoveredNode}
     <NodeTooltip nodeId={hoveredNode} x={tooltipX} y={tooltipY} />
