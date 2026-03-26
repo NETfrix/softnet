@@ -11,7 +11,11 @@ class DensityResponse(BaseModel):
 
 class ErgmRequest(BaseModel):
     terms: list[str]  # e.g. ["edges", "mutual", "gwesp(0.5)"]
+    method: str = "mple"  # "mple", "mcmc", "mple_mcmc"
     seed: int = 42
+    burnin: int = 10000
+    samplesize: int = 10000
+    interval: int = 1024
 
 
 class ErgmResponse(BaseModel):

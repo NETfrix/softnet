@@ -9,6 +9,7 @@
   let reciprocityVal: number | null = null;
   let reciprocityError: string | null = null;
   let ergmTerms = "edges";
+  let ergmMethod = "mple";
   let ergmResult: Record<string, unknown> | null = null;
   let computing = false;
 
@@ -58,7 +59,7 @@
 
     try {
       const terms = ergmTerms.split(",").map((t) => t.trim()).filter(Boolean);
-      const { task_id } = await runErgm($currentProject.id, { terms }) as { task_id: string };
+      const { task_id } = await runErgm($currentProject.id, { terms, method: ergmMethod }) as { task_id: string };
       const task = await pollTask(task_id, 3000);
       ergmResult = task.result || null;
       $statusMessage = "ERGM done";
@@ -119,9 +120,10 @@
     <div class="sub-title">ERGM</div>
     <label>
       Method
-      <select disabled>
-        <option value="mple">MPLE (fast, large networks)</option>
-        <option value="mcmc">MCMC-MLE (requires R/statnet)</option>
+      <select bind:value={ergmMethod}>
+        <option value="mple">MPLE (fast, Python)</option>
+        <option value="mcmc">MCMC-MLE (R via WSL)</option>
+        <option value="mple_mcmc">MPLE + MCMC (seeded, fastest MCMC)</option>
       </select>
     </label>
     <label>
