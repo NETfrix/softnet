@@ -47,7 +47,7 @@
     </label>
   </div>
 
-  <button on:click={run} disabled={!communityKey}>Compute EI Index</button>
+  <button on:click={run} disabled={!communityKey}>Compute Homophily</button>
 
   {#if result}
     <div class="results">
@@ -74,6 +74,37 @@
           Strong heterophily
         {/if}
       </div>
+
+      {#if result.newman_assortativity != null}
+        <div class="sub-title">Newman Assortativity</div>
+        <div class="metric">
+          <span class="lbl">Score:</span>
+          <span class="val">{result.newman_assortativity.toFixed(4)}</span>
+        </div>
+        <div class="interpretation">
+          {#if result.newman_assortativity > 0.3}
+            Strong assortative mixing (homophilic)
+          {:else if result.newman_assortativity > 0}
+            Weak assortative mixing
+          {:else if result.newman_assortativity > -0.3}
+            Weak disassortative mixing
+          {:else}
+            Strong disassortative mixing (heterophilic)
+          {/if}
+        </div>
+      {/if}
+
+      {#if result.newman_community_scores}
+        <div class="sub-title">Per-Community Newman Scores</div>
+        <div class="community-table">
+          {#each Object.entries(result.newman_community_scores) as [commId, scores]}
+            <div class="metric">
+              <span class="lbl">Community {commId}:</span>
+              <span class="val">{scores.newman_score?.toFixed(4) ?? "N/A"}</span>
+            </div>
+          {/each}
+        </div>
+      {/if}
     </div>
   {/if}
 </div>
@@ -95,5 +126,17 @@
     margin-top: 4px;
     color: var(--accent);
     font-size: 11px;
+  }
+  .sub-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 8px 0 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .community-table {
+    max-height: 150px;
+    overflow-y: auto;
   }
 </style>

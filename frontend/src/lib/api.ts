@@ -116,11 +116,47 @@ export async function getDensity(projectId: string) {
   return json_fetch(`/projects/${projectId}/density`);
 }
 
+export async function getConnectedComponents(projectId: string) {
+  return json_fetch(`/projects/${projectId}/components`);
+}
+
+export async function getClusteringCoefficient(projectId: string, mode: string = "global") {
+  return json_fetch(`/projects/${projectId}/clustering`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode }),
+  });
+}
+
+export async function getReciprocity(projectId: string) {
+  return json_fetch(`/projects/${projectId}/reciprocity`);
+}
+
 export async function runErgm(projectId: string, params: Record<string, unknown>) {
   return json_fetch(`/projects/${projectId}/ergm`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params),
+  });
+}
+
+// Bipartite
+export async function checkBipartite(projectId: string) {
+  return json_fetch(`/projects/${projectId}/bipartite`);
+}
+
+export async function projectBipartite(projectId: string, which: number = 0) {
+  return json_fetch(`/projects/${projectId}/bipartite/project`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ which }),
+  });
+}
+
+// Community Graph
+export async function getCommunityGraph(projectId: string, communityKey: string) {
+  return json_fetch(`/projects/${projectId}/community/${communityKey}/graph`, {
+    method: "POST",
   });
 }
 

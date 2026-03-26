@@ -1,8 +1,13 @@
 <script lang="ts">
   import { currentProject, statusMessage } from "../../lib/projectStore";
-  import { getDensity, runErgm, pollTask } from "../../lib/api";
+  import { getDensity, getConnectedComponents, getClusteringCoefficient, getReciprocity, runErgm, pollTask } from "../../lib/api";
 
   let density: number | null = null;
+  let components: { count: number; largest_size: number; components: { rank: number; component_id: number; size: number }[] } | null = null;
+  let clustering: { clustering_coefficient: number; mode: string } | null = null;
+  let clusteringMode = "global";
+  let reciprocityVal: number | null = null;
+  let reciprocityError: string | null = null;
   let ergmTerms = "edges";
   let ergmResult: Record<string, unknown> | null = null;
   let computing = false;
@@ -14,6 +19,35 @@
       density = result.density;
     } catch (e) {
       $statusMessage = `Density failed: ${e}`;
+    }
+  }
+
+  async function fetchComponents() {
+    if (!$currentProject) return;
+    try {
+      components = await getConnectedComponents($currentProject.id) as typeof components;
+    } catch (e) {
+      $statusMessage = `Components failed: ${e}`;
+    }
+  }
+
+  async function fetchClustering() {
+    if (!$currentProject) return;
+    try {
+      clustering = await getClusteringCoefficient($currentProject.id, clusteringMode) as typeof clustering;
+    } catch (e) {
+      $statusMessage = `Clustering failed: ${e}`;
+    }
+  }
+
+  async function fetchReciprocity() {
+    if (!$currentProject) return;
+    try {
+      const result = await getReciprocity($currentProject.id) as { reciprocity: number | null; error?: string };
+      reciprocityVal = result.reciprocity;
+      reciprocityError = result.error || null;
+    } catch (e) {
+      $statusMessage = `Reciprocity failed: ${e}`;
     }
   }
 
@@ -44,6 +78,43 @@
     <div class="metric">Density: {density.toFixed(6)}</div>
   {/if}
 
+  <button on:click={fetchComponents}>Connected Components</button>
+  {#if components}
+    <div class="metric">
+      Components: {components.count} | Largest: {components.largest_size} nodes
+    </div>
+    {#if components.components.length > 1}
+      <div class="metric-detail">
+        {#each components.components.slice(0, 10) as comp}
+          <div>#{comp.rank}: {comp.size} nodes</div>
+        {/each}
+        {#if components.components.length > 10}
+          <div>... and {components.components.length - 10} more</div>
+        {/if}
+      </div>
+    {/if}
+  {/if}
+
+  <div class="inline-row">
+    <button on:click={fetchClustering} style="flex:1">Clustering Coefficient</button>
+    <select bind:value={clusteringMode}>
+      <option value="global">Global</option>
+      <option value="local">Local (avg)</option>
+    </select>
+  </div>
+  {#if clustering}
+    <div class="metric">
+      {clustering.mode} clustering: {clustering.clustering_coefficient.toFixed(6)}
+    </div>
+  {/if}
+
+  <button on:click={fetchReciprocity}>Reciprocity</button>
+  {#if reciprocityVal !== null}
+    <div class="metric">Reciprocity: {reciprocityVal.toFixed(6)}</div>
+  {:else if reciprocityError}
+    <div class="note">{reciprocityError}</div>
+  {/if}
+
   <div class="ergm-section">
     <div class="sub-title">ERGM</div>
     <label>
@@ -70,6 +141,24 @@
     color: var(--text-primary);
     font-family: var(--font-mono);
     margin: 4px 0 8px;
+  }
+  .metric-detail {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    margin: 0 0 8px 8px;
+  }
+  .metric-detail div {
+    margin: 1px 0;
+  }
+  .inline-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .inline-row select {
+    width: 90px;
+    font-size: 11px;
   }
   .ergm-section {
     margin-top: 8px;

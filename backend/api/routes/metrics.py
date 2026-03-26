@@ -4,9 +4,22 @@ from fastapi import APIRouter, HTTPException
 
 from ...api.deps import get_project
 from ...core.tasks import task_manager
-from ...analysis.density import graph_density
+from ...analysis.density import (
+    graph_density,
+    connected_components,
+    clustering_coefficient,
+    reciprocity,
+)
 from ...bridges.rpy2_ergm import fit_ergm
-from ...schemas.metrics import DensityResponse, ErgmRequest, ErgmResponse
+from ...schemas.metrics import (
+    DensityResponse,
+    ErgmRequest,
+    ErgmResponse,
+    ConnectedComponentsResponse,
+    ClusteringCoefficientRequest,
+    ClusteringCoefficientResponse,
+    ReciprocityResponse,
+)
 
 router = APIRouter(prefix="/projects/{project_id}", tags=["metrics"])
 
@@ -16,6 +29,27 @@ async def get_density(project_id: str):
     project = get_project(project_id)
     result = graph_density(project.graph)
     return DensityResponse(**result)
+
+
+@router.get("/components")
+async def get_components(project_id: str):
+    project = get_project(project_id)
+    result = connected_components(project.graph)
+    return ConnectedComponentsResponse(**result)
+
+
+@router.post("/clustering")
+async def get_clustering(project_id: str, req: ClusteringCoefficientRequest):
+    project = get_project(project_id)
+    result = clustering_coefficient(project.graph, mode=req.mode)
+    return ClusteringCoefficientResponse(**result)
+
+
+@router.get("/reciprocity")
+async def get_reciprocity(project_id: str):
+    project = get_project(project_id)
+    result = reciprocity(project.graph)
+    return ReciprocityResponse(**result)
 
 
 @router.post("/ergm", status_code=202)

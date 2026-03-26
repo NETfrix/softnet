@@ -48,3 +48,5 @@ class HomophilyResponse(BaseModel):
     external_edges: int
     community_sizes: dict[str, int]
     attribute_distributions: dict[str, dict[str, int]] | None = None
+    newman_assortativity: float | None = None
+    newman_community_scores: dict[str, dict] | None = None

@@ -22,3 +22,33 @@ class ErgmResponse(BaseModel):
     aic: float
     bic: float
     formula: str
+
+
+class ComponentInfo(BaseModel):
+    rank: int
+    component_id: int
+    size: int
+
+
+class ConnectedComponentsResponse(BaseModel):
+    count: int
+    largest_size: int
+    largest_id: int | None
+    directed: bool
+    mode: str
+    components: list[ComponentInfo]
+
+
+class ClusteringCoefficientRequest(BaseModel):
+    mode: str = "global"  # "global" or "local"
+
+
+class ClusteringCoefficientResponse(BaseModel):
+    clustering_coefficient: float
+    mode: str
+
+
+class ReciprocityResponse(BaseModel):
+    reciprocity: float | None
+    directed: bool
+    error: str | None = None

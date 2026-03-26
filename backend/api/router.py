@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from .routes import (
+    bipartite,
     centrality,
     community,
     enrichment,
@@ -24,4 +25,5 @@ api_router.include_router(metrics.router)
 api_router.include_router(layout.router)
 api_router.include_router(enrichment.router)
 api_router.include_router(visualization.router)
+api_router.include_router(bipartite.router)
 api_router.include_router(tasks.router)

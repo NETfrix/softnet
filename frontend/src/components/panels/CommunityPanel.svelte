@@ -1,7 +1,7 @@
 <script lang="ts">
   import { currentProject, statusMessage } from "../../lib/projectStore";
   import { currentColorAttr } from "../../lib/graphStore";
-  import { detectCommunity, pollTask, getProject } from "../../lib/api";
+  import { detectCommunity, getCommunityGraph, pollTask, getProject } from "../../lib/api";
 
   let algorithm = "leiden";
   let resolution = 1.0;
@@ -11,6 +11,19 @@
   let numTrials = 10;
   let directedInfomap = true;
   let computing = false;
+  let communityGraphKey = "";
+  let communityGraph: { nodes: { id: number; name: string; size: number }[]; edges: { source: number; target: number; weight: number }[] } | null = null;
+
+  async function fetchCommunityGraph() {
+    if (!$currentProject || !communityGraphKey) return;
+    try {
+      const result = await getCommunityGraph($currentProject.id, communityGraphKey);
+      communityGraph = result as typeof communityGraph;
+      $statusMessage = "Community graph created";
+    } catch (e) {
+      $statusMessage = `Community graph failed: ${e}`;
+    }
+  }
 
   async function run() {
     if (!$currentProject) return;
@@ -116,6 +129,33 @@
     <div class="computed">
       Detected: {$currentProject.communities.join(", ")}
     </div>
+
+    <div class="comm-graph-section">
+      <div class="sub-title">Community Graph</div>
+      <div class="row">
+        <label>
+          Partition
+          <select bind:value={communityGraphKey}>
+            <option value="">Select...</option>
+            {#each $currentProject.communities as c}
+              <option value={c}>{c}</option>
+            {/each}
+          </select>
+        </label>
+      </div>
+      <button on:click={fetchCommunityGraph} disabled={!communityGraphKey}>
+        Create Community Graph
+      </button>
+
+      {#if communityGraph}
+        <div class="comm-graph-info">
+          <div>{communityGraph.nodes.length} communities, {communityGraph.edges.length} edges</div>
+          {#each communityGraph.nodes as node}
+            <div class="comm-node">{node.name}: {node.size} nodes</div>
+          {/each}
+        </div>
+      {/if}
+    </div>
   {/if}
 </div>
 
@@ -139,5 +179,25 @@
     font-size: 13px;
     color: var(--text-primary);
     margin-top: 16px;
+  }
+  .comm-graph-section {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .sub-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .comm-graph-info {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+  }
+  .comm-node {
+    margin: 1px 0 1px 8px;
   }
 </style>

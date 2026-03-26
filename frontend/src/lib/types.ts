@@ -51,6 +51,8 @@ export interface HomophilyResult {
   external_edges: number;
   community_sizes: Record<string, number>;
   attribute_distributions?: Record<string, Record<string, number>>;
+  newman_assortativity?: number;
+  newman_community_scores?: Record<string, { internal_edges: number; expected_random: number; newman_score: number }>;
 }
 
 export interface GraphPayload {

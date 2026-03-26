@@ -10,6 +10,7 @@ from ...analysis.community.louvain import louvain
 from ...analysis.community.leiden import leiden
 from ...analysis.community.infomap import infomap_detect
 from ...bridges.wsl_graphtool import run_sbm
+from ...analysis.community_graph import create_community_graph
 from ...schemas.community import CommunityRequest, CommunityResponse
 
 router = APIRouter(prefix="/projects/{project_id}/community", tags=["community"])
@@ -90,3 +91,37 @@ async def get_community(project_id: str, key: str):
         membership=membership,
         n_communities=len(set(membership)),
     )
+
+
+@router.post("/{key}/graph")
+async def get_community_graph(project_id: str, key: str):
+    """Create an aggregated community graph from a community partition."""
+    project = get_project(project_id)
+    membership = project.communities.get(key)
+    if membership is None:
+        raise HTTPException(404, f"Community '{key}' not found")
+
+    cg = create_community_graph(project.graph, membership)
+
+    nodes = []
+    for v in cg.vs:
+        nodes.append({
+            "id": v["community_id"],
+            "name": v["name"],
+            "size": v["size"],
+        })
+
+    edges = []
+    for e in cg.es:
+        edges.append({
+            "source": cg.vs[e.source]["community_id"],
+            "target": cg.vs[e.target]["community_id"],
+            "weight": e["weight"],
+        })
+
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "n_communities": cg.vcount(),
+        "n_edges": cg.ecount(),
+    }

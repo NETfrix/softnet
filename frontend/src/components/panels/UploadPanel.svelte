@@ -54,7 +54,7 @@
   <div class="row">
     <label>
       Graph file
-      <input type="file" accept=".csv,.tsv,.txt,.gexf,.graphml,.xml,.gephi" bind:this={fileInput} />
+      <input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls,.gexf,.graphml,.xml,.gephi" bind:this={fileInput} />
     </label>
   </div>
 
@@ -77,7 +77,7 @@
   </button>
 
   <div class="hint">
-    CSV: auto-detects edge list, adjacency matrix, or adjacency list.
+    CSV/Excel: auto-detects edge list, adjacency matrix, or adjacency list.
     Also supports GEXF, GraphML, and Gephi project files.
   </div>
 </div>
