@@ -118,17 +118,50 @@
   <div class="ergm-section">
     <div class="sub-title">ERGM</div>
     <label>
+      Method
+      <select disabled>
+        <option value="mple">MPLE (fast, large networks)</option>
+        <option value="mcmc">MCMC-MLE (requires R/statnet)</option>
+      </select>
+    </label>
+    <label>
       Terms (comma-separated)
-      <input bind:value={ergmTerms} placeholder="edges, mutual, gwesp(0.5, fixed=TRUE)" />
+      <input bind:value={ergmTerms} placeholder="edges, mutual, triangles, gwesp(0.5)" />
     </label>
     <button on:click={runErgmModel} disabled={computing}>
-      {computing ? "Fitting..." : "Fit ERGM"}
+      {computing ? "Fitting ERGM..." : "Fit ERGM"}
     </button>
-    <div class="note">Requires R + statnet. Large networks (>5000 nodes) may be very slow.</div>
+    {#if computing}
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    {/if}
+    <div class="note">
+      Terms: edges, mutual, triangles, gwesp(alpha), nodematch(attr), nodecov(attr), absdiff(attr)
+    </div>
 
     {#if ergmResult}
       <div class="ergm-results">
-        <pre>{JSON.stringify(ergmResult, null, 2)}</pre>
+        <div class="ergm-formula">{ergmResult.formula}</div>
+        <div class="ergm-meta">
+          Method: {ergmResult.method} | Dyads: {ergmResult.n_dyads?.toLocaleString()} | Edges: {ergmResult.n_edges?.toLocaleString()}
+        </div>
+        <table class="ergm-table">
+          <thead>
+            <tr><th>Term</th><th>Coef</th><th>SE</th><th>z</th></tr>
+          </thead>
+          <tbody>
+            {#each Object.entries(ergmResult.coefficients || {}) as [term, coef]}
+              <tr>
+                <td>{term}</td>
+                <td>{Number(coef).toFixed(4)}</td>
+                <td>{ergmResult.std_errors?.[term] != null ? Number(ergmResult.std_errors[term]).toFixed(4) : "—"}</td>
+                <td>{ergmResult.z_values?.[term] != null ? Number(ergmResult.z_values[term]).toFixed(2) : "—"}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+        <div class="ergm-fit">
+          AIC: {Number(ergmResult.aic).toFixed(1)} | BIC: {Number(ergmResult.bic).toFixed(1)} | LL: {Number(ergmResult.log_likelihood).toFixed(1)}
+        </div>
       </div>
     {/if}
   </div>
@@ -176,13 +209,62 @@
     color: var(--warning);
     margin-top: 4px;
   }
-  .ergm-results pre {
-    font-size: 11px;
-    background: var(--bg-primary);
-    padding: 8px;
-    border-radius: 4px;
-    overflow-x: auto;
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 4px 0;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 30%;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: slide 1.2s ease-in-out infinite;
+  }
+  @keyframes slide {
+    0% { transform: translateX(-100%); width: 30%; }
+    50% { width: 60%; }
+    100% { transform: translateX(350%); width: 30%; }
+  }
+  .ergm-results {
     margin-top: 8px;
+    font-size: 11px;
     color: var(--text-secondary);
+  }
+  .ergm-formula {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .ergm-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .ergm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .ergm-table th {
+    text-align: left;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    padding: 2px 4px;
+    font-weight: 600;
+  }
+  .ergm-table td {
+    padding: 2px 4px;
+    color: var(--text-primary);
+  }
+  .ergm-fit {
+    margin-top: 6px;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
   }
 </style>

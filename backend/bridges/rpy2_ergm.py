@@ -11,6 +11,21 @@ _ergm_pkg = None
 _initialized = False
 
 
+def check_r_available() -> tuple[bool, str]:
+    """Check if R and required packages are available."""
+    try:
+        import rpy2.robjects as ro
+    except ImportError:
+        return False, "rpy2 is not installed. Run: pip install rpy2"
+    try:
+        from rpy2.robjects.packages import importr
+        importr("network")
+        importr("ergm")
+    except Exception as e:
+        return False, f"R packages missing: {e}. In R, run: install.packages(c('network', 'ergm'))"
+    return True, "ok"
+
+
 def _init_r() -> None:
     global _network_pkg, _ergm_pkg, _initialized
     if _initialized:

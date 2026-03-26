@@ -10,7 +10,7 @@ from ...analysis.density import (
     clustering_coefficient,
     reciprocity,
 )
-from ...bridges.rpy2_ergm import fit_ergm
+from ...analysis.ergm_mple import fit_ergm_mple
 from ...schemas.metrics import (
     DensityResponse,
     ErgmRequest,
@@ -56,15 +56,10 @@ async def get_reciprocity(project_id: str):
 async def run_ergm(project_id: str, req: ErgmRequest):
     project = get_project(project_id)
 
-    n = project.node_count
-
     def _compute():
-        result = fit_ergm(
+        result = fit_ergm_mple(
             project.graph,
             terms=req.terms,
-            burnin=req.burnin,
-            samplesize=req.samplesize,
-            interval=req.interval,
             seed=req.seed,
         )
         project.ergm_results["+".join(req.terms)] = result

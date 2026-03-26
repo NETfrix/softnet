@@ -10,18 +10,21 @@ class DensityResponse(BaseModel):
 
 
 class ErgmRequest(BaseModel):
-    terms: list[str]  # e.g. ["edges", "mutual", "gwesp(0.5, fixed=TRUE)"]
-    burnin: int = 10000
-    samplesize: int = 10000
-    interval: int = 1024
+    terms: list[str]  # e.g. ["edges", "mutual", "gwesp(0.5)"]
     seed: int = 42
 
 
 class ErgmResponse(BaseModel):
     coefficients: dict[str, float]
+    std_errors: dict[str, float]
+    z_values: dict[str, float | None]
     aic: float
     bic: float
+    log_likelihood: float
     formula: str
+    method: str
+    n_dyads: int
+    n_edges: int
 
 
 class ComponentInfo(BaseModel):
