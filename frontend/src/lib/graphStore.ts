@@ -17,6 +17,15 @@ export const labelsVisible = writable(true);
 export const currentLayout = writable("default");
 export const currentSizeAttr = writable<string | null>(null);
 export const currentColorAttr = writable<string | null>(null);
+export const edgeScale = writable(1.0);
+
+// View mode: "graph" | "community-graph" | "comparison"
+export const viewMode = writable<string>("graph");
+export const communityGraphData = writable<{
+  nodes: { id: number; name: string; size: number }[];
+  edges: { source: number; target: number; weight: number }[];
+} | null>(null);
+export const comparisonData = writable<Record<string, unknown> | null>(null);
 
 export function deserializeGraph(buffer: ArrayBuffer): Graph {
   const data = decode(new Uint8Array(buffer)) as GraphPayload;

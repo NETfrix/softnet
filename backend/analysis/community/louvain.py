@@ -68,4 +68,5 @@ def _louvain_cpm(g: ig.Graph, resolution: float) -> dict:
         "membership": membership,
         "n_communities": n_communities,
         "modularity": modularity,
+        "cpm_quality": partition.quality(),
     }

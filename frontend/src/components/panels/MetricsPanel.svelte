@@ -124,7 +124,7 @@
     <button on:click={runErgmModel} disabled={computing}>
       {computing ? "Fitting..." : "Fit ERGM"}
     </button>
-    <div class="note">Requires R + statnet. Max ~5000 nodes.</div>
+    <div class="note">Requires R + statnet. Large networks (>5000 nodes) may be very slow.</div>
 
     {#if ergmResult}
       <div class="ergm-results">

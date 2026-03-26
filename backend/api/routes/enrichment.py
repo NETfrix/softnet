@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 
 from ...api.deps import get_project
 from ...enrichment.cache import enrichment_cache
+from ...enrichment.websearch import enrich_from_websearch
 from ...enrichment.wikipedia import enrich_from_wikipedia
 from ...enrichment.wikidata import enrich_from_wikidata
 from ...schemas.enrichment import EnrichmentRequest, EnrichmentResponse, EnrichmentResult
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/projects/{project_id}/enrich", tags=["enrichment"])
 _SOURCES = {
     "wikipedia": enrich_from_wikipedia,
     "wikidata": enrich_from_wikidata,
+    "websearch": enrich_from_websearch,
 }
 
 

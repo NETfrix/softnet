@@ -60,6 +60,17 @@
       />
       Wikidata
     </label>
+    <label class="checkbox-label">
+      <input
+        type="checkbox"
+        checked={sources.includes("websearch")}
+        on:change={(e) => {
+          if (e.currentTarget.checked) sources = [...sources, "websearch"];
+          else sources = sources.filter((s) => s !== "websearch");
+        }}
+      />
+      Web Search
+    </label>
   </div>
 
   <button on:click={run} disabled={enriching || !nodeIds.trim()}>

@@ -15,14 +15,25 @@
   <UploadPanel />
 
   {#if $currentProject}
-    <LayoutPanel />
-    <CentralityPanel />
-    <CommunityPanel />
-    <NodeSizePanel />
-    <HomophilyPanel />
-    <SankeyPanel />
-    <MetricsPanel />
-    <EnrichmentPanel />
+    <div class="section">
+      <div class="section-label">Visualization</div>
+      <LayoutPanel />
+      <NodeSizePanel />
+    </div>
+
+    <div class="section">
+      <div class="section-label">Analysis</div>
+      <CentralityPanel />
+      <CommunityPanel />
+      <HomophilyPanel />
+      <SankeyPanel />
+      <MetricsPanel />
+    </div>
+
+    <div class="section">
+      <div class="section-label">Data</div>
+      <EnrichmentPanel />
+    </div>
   {/if}
 </div>
 
@@ -33,5 +44,18 @@
     border-right: 1px solid var(--border);
     overflow-y: auto;
     flex-shrink: 0;
+  }
+
+  .section {
+    border-top: 2px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 8px 12px 2px;
   }
 </style>

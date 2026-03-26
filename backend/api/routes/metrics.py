@@ -57,12 +57,6 @@ async def run_ergm(project_id: str, req: ErgmRequest):
     project = get_project(project_id)
 
     n = project.node_count
-    if n > 5000:
-        raise HTTPException(
-            400,
-            f"ERGM is not feasible for graphs with {n} nodes. "
-            "Consider sampling your network to < 5000 nodes.",
-        )
 
     def _compute():
         result = fit_ergm(

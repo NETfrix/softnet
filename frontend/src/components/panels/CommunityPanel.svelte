@@ -1,24 +1,32 @@
 <script lang="ts">
   import { currentProject, statusMessage } from "../../lib/projectStore";
-  import { currentColorAttr } from "../../lib/graphStore";
+  import { currentColorAttr, viewMode, communityGraphData } from "../../lib/graphStore";
   import { detectCommunity, getCommunityGraph, pollTask, getProject } from "../../lib/api";
 
   let algorithm = "leiden";
   let resolution = 1.0;
   let quality = "modularity";
+
+  // When quality changes to CPM, set default gamma to 0.01
+  $: if (quality === "CPM" && resolution === 1.0) {
+    resolution = 0.01;
+  } else if (quality === "modularity" && resolution === 0.01) {
+    resolution = 1.0;
+  }
   let model = "nested";
   let degCorr = true;
   let numTrials = 10;
   let directedInfomap = true;
   let computing = false;
   let communityGraphKey = "";
-  let communityGraph: { nodes: { id: number; name: string; size: number }[]; edges: { source: number; target: number; weight: number }[] } | null = null;
+  let lastResult: Record<string, unknown> | null = null;
 
   async function fetchCommunityGraph() {
     if (!$currentProject || !communityGraphKey) return;
     try {
       const result = await getCommunityGraph($currentProject.id, communityGraphKey);
-      communityGraph = result as typeof communityGraph;
+      communityGraphData.set(result as typeof $communityGraphData);
+      $viewMode = "community-graph";
       $statusMessage = "Community graph created";
     } catch (e) {
       $statusMessage = `Community graph failed: ${e}`;
@@ -42,13 +50,14 @@
       }
 
       const { task_id } = await detectCommunity($currentProject.id, params) as { task_id: string };
-      const result = await pollTask(task_id);
+      const task = await pollTask(task_id);
+      lastResult = (task.result as Record<string, unknown>) || null;
 
       $currentProject = await getProject($currentProject.id);
 
       // Auto-color by this community
-      if (result.result && typeof result.result === "object" && "key" in result.result) {
-        $currentColorAttr = result.result.key as string;
+      if (lastResult && "key" in lastResult) {
+        $currentColorAttr = lastResult.key as string;
       }
 
       $statusMessage = `${algorithm} done`;
@@ -79,7 +88,7 @@
     <div class="row">
       <label>
         Resolution (gamma)
-        <input type="number" bind:value={resolution} min="0.01" max="10" step="0.1" />
+        <input type="number" bind:value={resolution} min="0.001" max="10" step="0.01" />
       </label>
       <label>
         Quality
@@ -125,6 +134,26 @@
     {computing ? "Detecting..." : "Detect Communities"}
   </button>
 
+  {#if lastResult}
+    <div class="result-info">
+      <div class="metric-row">
+        <span class="lbl">Communities:</span>
+        <span class="val">{lastResult.n_communities}</span>
+      </div>
+      {#if lastResult.cpm_quality != null}
+        <div class="metric-row">
+          <span class="lbl">H (CPM quality):</span>
+          <span class="val">{Number(lastResult.cpm_quality).toFixed(4)}</span>
+        </div>
+      {:else if lastResult.modularity != null}
+        <div class="metric-row">
+          <span class="lbl">Modularity:</span>
+          <span class="val">{Number(lastResult.modularity).toFixed(4)}</span>
+        </div>
+      {/if}
+    </div>
+  {/if}
+
   {#if $currentProject?.communities.length}
     <div class="computed">
       Detected: {$currentProject.communities.join(", ")}
@@ -146,15 +175,6 @@
       <button on:click={fetchCommunityGraph} disabled={!communityGraphKey}>
         Create Community Graph
       </button>
-
-      {#if communityGraph}
-        <div class="comm-graph-info">
-          <div>{communityGraph.nodes.length} communities, {communityGraph.edges.length} edges</div>
-          {#each communityGraph.nodes as node}
-            <div class="comm-node">{node.name}: {node.size} nodes</div>
-          {/each}
-        </div>
-      {/if}
     </div>
   {/if}
 </div>
@@ -180,6 +200,20 @@
     color: var(--text-primary);
     margin-top: 16px;
   }
+  .result-info {
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 1px 0;
+  }
+  .lbl { color: var(--text-muted); }
+  .val { color: var(--text-primary); font-family: var(--font-mono); }
   .comm-graph-section {
     margin-top: 8px;
     padding-top: 8px;
@@ -190,14 +224,5 @@
     font-weight: 600;
     color: var(--text-muted);
     margin-bottom: 6px;
-  }
-  .comm-graph-info {
-    margin-top: 8px;
-    font-size: 11px;
-    color: var(--text-secondary);
-    font-family: var(--font-mono);
-  }
-  .comm-node {
-    margin: 1px 0 1px 8px;
   }
 </style>

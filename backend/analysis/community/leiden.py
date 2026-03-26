@@ -38,10 +38,16 @@ def leiden(
     n_communities = len(set(membership))
     key = f"leiden_{resolution}_{quality}"
 
-    return {
+    result = {
         "algorithm": "leiden",
         "key": key,
         "membership": membership,
         "n_communities": n_communities,
         "modularity": modularity,
     }
+
+    # For CPM, include the H score (CPM quality/objective value)
+    if quality == "CPM":
+        result["cpm_quality"] = partition.quality()
+
+    return result

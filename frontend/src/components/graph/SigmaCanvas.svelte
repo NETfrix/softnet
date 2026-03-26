@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import Sigma from "sigma";
-  import { graphStore, labelsVisible, deserializeGraph, currentLayout, currentSizeAttr, currentColorAttr } from "../../lib/graphStore";
+  import { graphStore, labelsVisible, deserializeGraph, currentLayout, currentSizeAttr, currentColorAttr, edgeScale } from "../../lib/graphStore";
   import { currentProject, statusMessage } from "../../lib/projectStore";
   import { getGraphData } from "../../lib/api";
   import GraphControls from "./GraphControls.svelte";
@@ -74,6 +74,14 @@
     sigma.setSetting("renderLabels", $labelsVisible);
   }
 
+  // React to edge scale changes
+  $: if (sigma && $graphStore) {
+    $graphStore.forEachEdge((edge) => {
+      $graphStore!.setEdgeAttribute(edge, "size", 0.5 * $edgeScale);
+    });
+    sigma.refresh();
+  }
+
   // React to project changes
   $: if ($currentProject) {
     loadGraph();
@@ -84,9 +92,22 @@
     initSigma();
   }
 
-  // React to layout/size/color changes
-  $: if ($currentProject && ($currentLayout || $currentSizeAttr || $currentColorAttr)) {
-    // Reload on attribute changes (after initial load)
+  // React to layout/size/color changes — reload graph data from server
+  let prevLayout = $currentLayout;
+  let prevSize = $currentSizeAttr;
+  let prevColor = $currentColorAttr;
+
+  $: {
+    const layoutChanged = $currentLayout !== prevLayout;
+    const sizeChanged = $currentSizeAttr !== prevSize;
+    const colorChanged = $currentColorAttr !== prevColor;
+
+    if ($currentProject && (layoutChanged || sizeChanged || colorChanged)) {
+      prevLayout = $currentLayout;
+      prevSize = $currentSizeAttr;
+      prevColor = $currentColorAttr;
+      loadGraph();
+    }
   }
 
   onMount(() => {
@@ -128,12 +149,21 @@
   {#if hoveredNode}
     <NodeTooltip nodeId={hoveredNode} x={tooltipX} y={tooltipY} />
   {/if}
+  {#if $currentProject}
+    <div class="overlay bottom-left network-info">
+      <span>{$currentProject.node_count.toLocaleString()} nodes</span>
+      <span class="sep">|</span>
+      <span>{$currentProject.edge_count.toLocaleString()} edges</span>
+      <span class="sep">|</span>
+      <span>{$currentProject.directed ? "directed" : "undirected"}</span>
+    </div>
+  {/if}
 </div>
 
 <style>
   .sigma-wrapper {
     width: 100%;
-    height: 100%;
+    flex: 1;
     position: relative;
   }
 
@@ -152,5 +182,26 @@
   .overlay.top-right {
     top: 12px;
     right: 12px;
+  }
+
+  .overlay.bottom-left {
+    bottom: 12px;
+    left: 12px;
+    flex-direction: row;
+  }
+
+  .network-info {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .network-info .sep {
+    margin: 0 4px;
+    opacity: 0.4;
   }
 </style>
