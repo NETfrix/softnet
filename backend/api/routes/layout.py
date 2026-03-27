@@ -6,6 +6,7 @@ from ...api.deps import get_project
 from ...core.tasks import task_manager
 from ...layout.forceatlas2 import compute_forceatlas2
 from ...layout.yifan_hu import compute_yifan_hu
+from ...layout.community_layout import compute_community_layout
 from ...layout.utils import normalize_positions
 from ...schemas.layout import LayoutRequest, LayoutResponse
 
@@ -26,13 +27,36 @@ async def compute_layout(project_id: str, req: LayoutRequest):
                 strong_gravity=req.strong_gravity,
                 barnes_hut=req.barnes_hut,
             )
+            key = "forceatlas2"
         elif req.algorithm == "yifan_hu":
             positions = compute_yifan_hu(project.graph)
+            key = "yifan_hu"
+        elif req.algorithm == "community":
+            # Get or compute community partition
+            membership = None
+            if req.community_key and req.community_key in project.communities:
+                membership = project.communities[req.community_key]
+            else:
+                # Run Leiden on the fly
+                from ...analysis.community.leiden import leiden
+                from ...analysis.community.renumber import renumber_by_size
+
+                result = leiden(project.graph, resolution=req.resolution)
+                result["membership"] = renumber_by_size(result["membership"])
+                project.communities[result["key"]] = result["membership"]
+                membership = result["membership"]
+
+            positions = compute_community_layout(
+                project.graph,
+                membership=membership,
+                internal_iterations=req.iterations,
+                spacing=req.spacing,
+            )
+            key = f"community_{req.community_key or 'leiden'}"
         else:
             raise ValueError(f"Unknown layout algorithm: {req.algorithm}")
 
         normalized = normalize_positions(positions)
-        key = req.algorithm
         project.layouts[key] = normalized
         return {"algorithm": req.algorithm, "key": key, "node_count": len(normalized)}
 
