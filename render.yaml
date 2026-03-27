@@ -1,6 +1,7 @@
 services:
   - type: web
     name: softnet
+    plan: free
     runtime: python
     pythonVersion: "3.11"
     buildCommand: pip install -e . && cd frontend && npm install && npm run build
