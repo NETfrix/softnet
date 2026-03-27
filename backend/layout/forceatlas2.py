@@ -20,7 +20,7 @@ def compute_forceatlas2(
     iterations: int = 100,
     scaling: float = 2.0,
     gravity: float = 1.0,
-    strong_gravity: bool = False,
+    strong_gravity: bool = True,
     barnes_hut: bool = True,
 ) -> list[tuple[float, float]]:
     """Compute ForceAtlas2 layout using the compiled fa2 library."""
