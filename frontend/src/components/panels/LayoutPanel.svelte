@@ -43,7 +43,7 @@
     <label>
       Algorithm
       <select bind:value={algorithm}>
-        <option value="forceatlas2">ForceAtlas2</option>
+        <option value="forceatlas2">MultiGravity ForceAtlas2</option>
         <option value="yifan_hu">Yifan Hu</option>
       </select>
     </label>
