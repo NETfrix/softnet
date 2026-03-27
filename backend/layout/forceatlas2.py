@@ -163,35 +163,55 @@ def _build_quadtree(pos: np.ndarray, mass: np.ndarray):
     return root
 
 
-def _qt_insert(node, px, py, m, idx):
-    """Insert a point into the quad-tree."""
-    if node["mass"] == 0 and node["leaf"]:
-        node["cx"] = px
-        node["cy"] = py
-        node["mass"] = m
-        node["idx"] = idx
-        return
+def _qt_insert(node, px, py, m, idx, _max_depth=64):
+    """Insert a point into the quad-tree (iterative to avoid recursion limits)."""
+    # Track ancestors so we can update center-of-mass on the way back up.
+    ancestors = []
 
-    if node["leaf"]:
-        node["children"] = [None, None, None, None]
-        node["leaf"] = False
-        # Re-insert existing point
-        old_cx, old_cy, old_m, old_idx = node["cx"], node["cy"], node["mass"], node["idx"]
-        node["cx"] = 0.0
-        node["cy"] = 0.0
-        node["mass"] = 0.0
-        node["idx"] = -1
-        _qt_insert_into_child(node, old_cx, old_cy, old_m, old_idx)
+    cur = node
+    for _ in range(_max_depth):
+        # Empty leaf – place point here.
+        if cur["mass"] == 0 and cur["leaf"]:
+            cur["cx"] = px
+            cur["cy"] = py
+            cur["mass"] = m
+            cur["idx"] = idx
+            break
 
-    _qt_insert_into_child(node, px, py, m, idx)
+        # Occupied leaf – subdivide and re-insert the old occupant.
+        if cur["leaf"]:
+            cur["children"] = [None, None, None, None]
+            cur["leaf"] = False
+            old_cx, old_cy, old_m, old_idx = cur["cx"], cur["cy"], cur["mass"], cur["idx"]
+            cur["cx"] = 0.0
+            cur["cy"] = 0.0
+            cur["mass"] = 0.0
+            cur["idx"] = -1
+            # Jitter coincident points so subdivision terminates.
+            if old_cx == px and old_cy == py:
+                jitter = cur["size"] * 1e-6
+                old_cx += jitter
+                old_cy += jitter
+            _qt_place_in_child(cur, old_cx, old_cy, old_m, old_idx)
 
-    total_mass = node["mass"] + m
-    node["cx"] = (node["cx"] * node["mass"] + px * m) / total_mass
-    node["cy"] = (node["cy"] * node["mass"] + py * m) / total_mass
-    node["mass"] = total_mass
+        # Record ancestor for later center-of-mass update, then descend.
+        ancestors.append(cur)
+        cur = _qt_place_in_child(cur, px, py, m, idx)
+    else:
+        # Max depth reached – merge into current node.
+        cur["mass"] += m
+
+    # Walk back up and update center-of-mass for each ancestor.
+    for anc in reversed(ancestors):
+        total_mass = anc["mass"] + m
+        anc["cx"] = (anc["cx"] * anc["mass"] + px * m) / total_mass
+        anc["cy"] = (anc["cy"] * anc["mass"] + py * m) / total_mass
+        anc["mass"] = total_mass
 
 
-def _qt_insert_into_child(node, px, py, m, idx):
+def _qt_place_in_child(node, px, py, m, idx):
+    """Place a point into the correct child quadrant, creating it if needed.
+    Returns the child node."""
     half = node["size"] / 2
     mx = node["x"] + half
     my = node["y"] + half
@@ -210,7 +230,7 @@ def _qt_insert_into_child(node, px, py, m, idx):
             "children": None, "leaf": True, "idx": -1,
         }
 
-    _qt_insert(node["children"][qi], px, py, m, idx)
+    return node["children"][qi]
 
 
 def _bh_force(node, px, py, pm, kr, theta):
