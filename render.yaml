@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: softnet
+    runtime: python
+    pythonVersion: "3.11"
+    buildCommand: pip install -e . && cd frontend && npm install && npm run build
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SOFTNET_PORT
+        sync: false
+      - key: SOFTNET_OPEN_BROWSER
+        value: "0"

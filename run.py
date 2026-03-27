@@ -18,6 +18,8 @@ def main():
     args = parser.parse_args()
 
     os.environ["SOFTNET_PORT"] = str(args.port)
+    if not args.no_browser:
+        os.environ["SOFTNET_OPEN_BROWSER"] = "1"
     if args.dev:
         os.environ["SOFTNET_DEV_MODE"] = "true"
 

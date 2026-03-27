@@ -37,12 +37,9 @@ app.add_middleware(
 app.include_router(api_router)
 
 
-_OPEN_BROWSER = os.environ.get("SOFTNET_OPEN_BROWSER", "0") == "1"
-
-
 @app.on_event("startup")
 async def _open_browser_on_startup():
-    if _OPEN_BROWSER:
+    if os.environ.get("SOFTNET_OPEN_BROWSER") == "1":
         import webbrowser
         webbrowser.open(f"http://localhost:{os.environ.get('SOFTNET_PORT', '8000')}")
 

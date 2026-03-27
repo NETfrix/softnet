@@ -46,11 +46,8 @@ echo.
 echo  Press Ctrl+C to stop.
 echo.
 
-:: Tell the server to open the browser when it's ready
+:: Start server (builds frontend if needed, opens browser automatically)
 set SOFTNET_OPEN_BROWSER=1
-set SOFTNET_PORT=8000
-
-:: Start server
-python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
+python run.py
 
 pause

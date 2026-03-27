@@ -4,11 +4,15 @@ Social Network Analysis Tool
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/NETfrix/softnet?quickstart=1)
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/NETfrix/softnet)
+
 ## Quick Start
 
-### Run in the cloud (no install needed)
+### Use online (no install needed)
 
-Click the **Open in GitHub Codespaces** button above. The app will build automatically and open in your browser.
+Click the **Deploy to Render** button above to get a public URL anyone can use — no signup required for your users.
+
+Or click **Open in GitHub Codespaces** for a personal dev environment in the browser.
 
 ### Run locally
 
