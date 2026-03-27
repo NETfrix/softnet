@@ -32,7 +32,7 @@ def compute_forceatlas2(
 
     if _HAS_FA2:
         fa2 = _FA2(
-            outboundAttractionDistribution=True,  # MultiGravity (LinLog mode)
+            outboundAttractionDistribution=False,
             scalingRatio=scaling,
             gravity=gravity,
             strongGravityMode=strong_gravity,
