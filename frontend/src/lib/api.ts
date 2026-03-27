@@ -183,9 +183,14 @@ export async function getTask(taskId: string): Promise<TaskRecord> {
   return json_fetch(`/tasks/${taskId}`);
 }
 
-export async function pollTask(taskId: string, intervalMs = 1000): Promise<TaskRecord> {
+export async function pollTask(taskId: string, intervalMs = 1000, maxWaitMs = 5 * 60 * 1000): Promise<TaskRecord> {
   return new Promise((resolve, reject) => {
+    const startTime = Date.now();
     const check = async () => {
+      if (Date.now() - startTime > maxWaitMs) {
+        reject(new Error("Layout computation timed out"));
+        return;
+      }
       try {
         const task = await getTask(taskId);
         if (task.status === "completed") {

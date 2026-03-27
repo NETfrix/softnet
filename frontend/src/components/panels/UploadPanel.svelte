@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentProject, projects, statusMessage } from "../../lib/projectStore";
+  import { currentProject, projects, statusMessage, layoutReady } from "../../lib/projectStore";
   import { uploadGraph, listProjects, pollTask } from "../../lib/api";
 
   let name = "Untitled";
@@ -27,11 +27,13 @@
     }
 
     try {
+      $layoutReady = false;
       const result = await uploadGraph(formData);
       $currentProject = result.project;
       $projects = await listProjects();
       $statusMessage = "Computing layout...";
       await pollTask(result.layout_task_id);
+      $layoutReady = true;
       $statusMessage = "";
     } catch (e) {
       $statusMessage = `Upload failed: ${e}`;

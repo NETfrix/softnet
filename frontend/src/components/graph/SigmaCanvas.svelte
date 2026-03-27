@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import Sigma from "sigma";
   import { graphStore, labelsVisible, deserializeGraph, currentLayout, currentSizeAttr, currentColorAttr, edgeScale, labelScale, edgeBrightness } from "../../lib/graphStore";
-  import { currentProject, statusMessage } from "../../lib/projectStore";
+  import { currentProject, statusMessage, layoutReady } from "../../lib/projectStore";
   import { getGraphData } from "../../lib/api";
   import GraphControls from "./GraphControls.svelte";
   import LabelToggle from "./LabelToggle.svelte";
@@ -114,8 +114,8 @@
     }
   }
 
-  // React to project changes
-  $: if ($currentProject) {
+  // React to project changes — wait until layout is computed
+  $: if ($currentProject && $layoutReady) {
     loadGraph();
   }
 
@@ -143,7 +143,7 @@
   }
 
   onMount(() => {
-    if ($currentProject) loadGraph();
+    if ($currentProject && $layoutReady) loadGraph();
   });
 
   onDestroy(() => {

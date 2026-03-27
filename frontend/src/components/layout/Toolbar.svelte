@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentProject, projects } from "../../lib/projectStore";
+  import { currentProject, projects, layoutReady } from "../../lib/projectStore";
   import { listProjects, getProject } from "../../lib/api";
   import { onMount } from "svelte";
 
@@ -11,6 +11,7 @@
 
   async function selectProject(id: string) {
     $currentProject = await getProject(id);
+    $layoutReady = true;
   }
 </script>
 

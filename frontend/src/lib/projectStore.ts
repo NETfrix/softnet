@@ -5,3 +5,4 @@ export const currentProject = writable<ProjectMeta | null>(null);
 export const projects = writable<ProjectMeta[]>([]);
 export const runningTasks = writable<string[]>([]);
 export const statusMessage = writable<string>("");
+export const layoutReady = writable(false);
