@@ -10,9 +10,9 @@ Social Network Analysis Tool
 
 ### Use online (no install needed)
 
-Click the **Deploy to Render** button above to get a public URL anyone can use — no signup required for your users.
+**[Launch Softnet](https://softnet-b4pp.onrender.com)** — runs in your browser, nothing to install.
 
-Or click **Open in GitHub Codespaces** for a personal dev environment in the browser.
+Or click **Open in GitHub Codespaces** for a personal dev environment.
 
 ### Run locally
 
