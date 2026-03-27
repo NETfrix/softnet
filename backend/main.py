@@ -37,6 +37,16 @@ app.add_middleware(
 app.include_router(api_router)
 
 
+_OPEN_BROWSER = os.environ.get("SOFTNET_OPEN_BROWSER", "0") == "1"
+
+
+@app.on_event("startup")
+async def _open_browser_on_startup():
+    if _OPEN_BROWSER:
+        import webbrowser
+        webbrowser.open(f"http://localhost:{os.environ.get('SOFTNET_PORT', '8000')}")
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -74,13 +84,14 @@ def _build_frontend() -> None:
 def main() -> None:
     """Single entry point: build frontend + start server."""
     import uvicorn
-    import webbrowser
 
     _build_frontend()
 
+    os.environ["SOFTNET_OPEN_BROWSER"] = "1"
+    os.environ["SOFTNET_PORT"] = str(settings.port)
+
     url = f"http://localhost:{settings.port}"
     print(f"\n  Softnet running at {url}\n")
-    webbrowser.open(url)
 
     uvicorn.run(
         "backend.main:app",

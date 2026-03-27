@@ -46,8 +46,9 @@ echo.
 echo  Press Ctrl+C to stop.
 echo.
 
-:: Open browser after a short delay
-start /b cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:8000"
+:: Tell the server to open the browser when it's ready
+set SOFTNET_OPEN_BROWSER=1
+set SOFTNET_PORT=8000
 
 :: Start server
 python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
