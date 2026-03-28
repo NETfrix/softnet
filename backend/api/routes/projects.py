@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import os
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -46,7 +47,9 @@ async def upload_graph(
             graph = parse_gephi(file.file)
             directed = graph.is_directed()
         elif ext in (".xlsx", ".xls"):
-            graph = parse_excel(file.file, directed=directed)
+            file.file.seek(0)
+            raw = file.file.read()
+            graph = parse_excel(io.BytesIO(raw), directed=directed)
         else:
             raise HTTPException(
                 status_code=400,
