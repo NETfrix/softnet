@@ -57,6 +57,8 @@ async def upload_graph(
             )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Parse error: {e}")
 
     # Add node attributes from separate file if provided
     if node_file is not None and node_file.filename:
