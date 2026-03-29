@@ -3,11 +3,14 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import sys
 import tempfile
 import uuid
 from pathlib import PureWindowsPath
 
 import igraph as ig
+
+IS_WINDOWS = sys.platform == "win32"
 
 
 def _windows_to_wsl_path(win_path: str) -> str:
@@ -25,9 +28,10 @@ async def run_sbm(
     timeout: int = 600,
 ) -> dict:
     """
-    Run Peixoto's SBM via graph-tool in WSL.
+    Run Peixoto's SBM via graph-tool.
 
-    Writes edge list to temp file, calls WSL subprocess, reads result.
+    On Windows: delegates to WSL subprocess.
+    On Linux:   runs the worker script directly (graph-tool installed natively).
     """
     uid = uuid.uuid4().hex
     tmp_dir = tempfile.gettempdir()
@@ -45,22 +49,33 @@ async def run_sbm(
     with open(meta_path, "w") as f:
         json.dump({"directed": g.is_directed(), "n_vertices": g.vcount()}, f)
 
-    wsl_input = _windows_to_wsl_path(input_path)
-    wsl_output = _windows_to_wsl_path(output_path)
-    wsl_meta = _windows_to_wsl_path(meta_path)
-
     # Find the worker script
     script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     worker_path = os.path.join(script_dir, "wsl", "sbm_worker.py")
-    wsl_script = _windows_to_wsl_path(worker_path)
 
-    cmd = [
-        "wsl.exe", "python3", wsl_script,
-        "--input", wsl_input,
-        "--output", wsl_output,
-        "--meta", wsl_meta,
-        "--model", model,
-    ]
+    if IS_WINDOWS:
+        wsl_input = _windows_to_wsl_path(input_path)
+        wsl_output = _windows_to_wsl_path(output_path)
+        wsl_meta = _windows_to_wsl_path(meta_path)
+        wsl_script = _windows_to_wsl_path(worker_path)
+
+        cmd = [
+            "wsl.exe", "python3", wsl_script,
+            "--input", wsl_input,
+            "--output", wsl_output,
+            "--meta", wsl_meta,
+            "--model", model,
+        ]
+    else:
+        # Linux / macOS — run graph-tool directly
+        cmd = [
+            sys.executable, worker_path,
+            "--input", input_path,
+            "--output", output_path,
+            "--meta", meta_path,
+            "--model", model,
+        ]
+
     if deg_corr:
         cmd.append("--deg-corr")
 
